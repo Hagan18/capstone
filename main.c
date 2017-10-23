@@ -41,7 +41,8 @@ int main(int argc, const char * argv[]) {
 
     if (argc >= 2) {
         /*  Addr on cmdline: */
-        srvr_addr = argv[1];
+        //srvr_addr = argv[1];
+        strcpy(srvr_addr,argv[1]);
     }
     else {
         /*  Use default address: */
