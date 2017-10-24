@@ -28,6 +28,7 @@ static void bail(const char *on_what) {
 int main(int argc, const char * argv[]) {
     int z;
     char *srvr_addr = NULL;
+    char *srvr_port;
     struct sockaddr_in adr_srvr;    //AF_INET
     int len_inet;                   //length
     int s;                          //socket
@@ -50,18 +51,28 @@ int main(int argc, const char * argv[]) {
         /*  Use default address: */
         srvr_addr = "127.0.0.1";
     }
-    
-    /*  Look up the daytime tcp service:    */
-    sp = getservbyname("daytime","tcp");
-    if (!sp){
-        fputs("Unknown service: daytime tcp\n",stderr);
-        exit(1);
+
+    if (argc >= 3) {
+	    //srvr_port = argv[2];
+	    srvr_port = strdup(argv[2]);
     }
+    else {
+	srvr_port = strdup("9099");
+    }
+
+    //printf("server address: %s\n",srvr_addr);
+
+    /*  Look up the daytime tcp service:    */
+    //sp = getservbyname("daytime","tcp");
+    //if (!sp){
+        //fputs("Unknown service: daytime tcp\n",stderr);
+        //exit(1);
+    //}
     
     /*  Create a server socket address  */
     memset(&adr_srvr,0,sizeof(adr_srvr));
     adr_srvr.sin_family = AF_INET;
-    adr_srvr.sin_port = sp->s_port;
+    adr_srvr.sin_port = htons(atoi(srvr_port));
     adr_srvr.sin_addr.s_addr = inet_addr(srvr_addr);
     
     if (adr_srvr.sin_addr.s_addr == INADDR_NONE) {
