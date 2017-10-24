@@ -48,7 +48,8 @@ int main(int argc,char **argv) {
 	*/
 	if (argc >= 2) {
 		/*	address on cmd len_inet	*/
-		strcpy(srvr_addr, argv[1]);
+		//strcpy(srvr_addr, argv[1]);
+		srvr_addr = strdup(argv[1]);
 	}
 	else {
 		/*	use default address:	*/
@@ -57,7 +58,8 @@ int main(int argc,char **argv) {
 
 	/*	If there's a second argument on the command line, use it as the port #	*/
 	if (argc >= 3) {
-		strcpy(srvr_port,argv[2]);
+		//strcpy(srvr_port,argv[2]);
+		srvr_port = strdup(argv[2]);
 	}
 
 	/*	create a TCP/IP socket to Use 	*/
@@ -106,10 +108,11 @@ int main(int argc,char **argv) {
 
 		/*	generate a time stamp:	*/
 		time(&td);
-		n = (int) strftime(dtbuf, sizeof(dtbuf),"%A %b %d %H:%M:%S %Y\n",localtime(&td));
-
+		//n = (int) strftime(dtbuf, sizeof(dtbuf),"%A %b %d %H:%M:%S %Y\n",localtime(&td));
+		n = (int) strftime(dtbuf, sizeof(dtbuf),"%A %b %d\n",localtime(&td));
 		/*	write back to client: 	*/
-		z = write(c,dtbuf,n);
+		//z = write(c,dtbuf,n);
+		z = write(c,"Kyle",6);
 		if (z == -1){
 			bail("write(2)");
 		}
