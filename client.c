@@ -60,15 +60,6 @@ int main(int argc, const char * argv[]) {
 	srvr_port = strdup("9099");
     }
 
-    //printf("server address: %s\n",srvr_addr);
-
-    /*  Look up the daytime tcp service:    */
-    //sp = getservbyname("daytime","tcp");
-    //if (!sp){
-        //fputs("Unknown service: daytime tcp\n",stderr);
-        //exit(1);
-    //}
-    
     /*  Create a server socket address  */
     memset(&adr_srvr,0,sizeof(adr_srvr));
     adr_srvr.sin_family = AF_INET;
