@@ -36,13 +36,15 @@ int main(int argc, const char * argv[]) {
     
     /*
      * Use a server address from the command line, if one has been provided.
-     * Otherwise, this program will default to useing the arbitrary addr 127.0.0.1
+     * Otherwise, this program will default to useing the arbitrary addr 
+     * 127.0.0.1
      */
 
     if (argc >= 2) {
         /*  Addr on cmdline: */
         //srvr_addr = argv[1];
-        strcpy(srvr_addr,argv[1]);
+        //strcpy(srvr_addr,argv[1]);
+    	srvr_addr = strdup(argv[1]);
     }
     else {
         /*  Use default address: */
