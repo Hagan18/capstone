@@ -76,8 +76,11 @@ int main(int argc, char **argv) {
 			bail("recfrom(2)");
 
 		fwrite(dgram,z,1,stdout);
-		
-		if (strcmp(dgram,"1") == 0) {
+		char *input = malloc(sizeof(char*)*2);
+		//input = strdup(dgram);
+		strcpy(input,dgram);
+		printf("%d",sizeof(input));
+		if (strncmp(input,"kyle",1) == 0) {
 			int status = system("omxplayer blink.mp3");
 		}
 
