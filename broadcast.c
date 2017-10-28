@@ -135,8 +135,13 @@ int main(int argc, char**argv){
 
 			bp += strlen(bp);
 		}
-
-		z = sendto(s, bcbuf, strlen(bcbuf), 0, (struct sockaddr *)&adr_bc, len_bc);
+		char input[256];
+		int i;
+		printf("enter some shit: ");
+		if (fgets(input, sizeof(input),stdin)){
+			if(sscanf(input,"%d", &i)){}
+		}
+		z = sendto(s, input, strlen(input), 0, (struct sockaddr *)&adr_bc, len_bc);
 		printf("sent\n");
 		if(z==-1)
 			bail("sendto()");
