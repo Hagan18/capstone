@@ -1,3 +1,11 @@
+/********************
+ * Kyle Hagan
+ * Example call: ./broadcast 10.81.55.255:9097 '10.81.55.116:*'
+ * the previous command is made up of the server's broadcast IP
+ * the second part is the server's IP with * as the port number
+ * so that it will work with all ports
+ */
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -146,7 +154,7 @@ int main(int argc, char**argv){
 		if(z==-1)
 			bail("sendto()");
 
-		sleep(4);
+		//sleep(4);
 	}
 	return 0;
 }
