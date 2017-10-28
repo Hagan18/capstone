@@ -72,11 +72,15 @@ int main(int argc, char **argv) {
 			0,	//flags: no options
 			(struct sockaddr *)&adr,  //addr
 			&x);	//addr len, in & out
-		printf("received\n");
 		if (x<0)
 			bail("recfrom(2)");
 
 		fwrite(dgram,z,1,stdout);
+		
+		if (strcmp(dgram,"1") == 0) {
+			int status = system("omxplayer blink.mp3");
+		}
+
 		putchar('\n');
 
 		fflush(stdout);
