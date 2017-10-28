@@ -16,6 +16,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <time.h>
 
 static void bail(const char *on_what) {
     fputs(strerror(errno),stderr);
@@ -83,18 +84,20 @@ int main(int argc, const char * argv[]) {
     if (z == -1) {
         bail("connect(2)");
     }
+
+    while(1){    
+    	/*  Read the date/time info:    */
+    	z = read(s,&dtbuf,sizeof(dtbuf)-1);
+    	if (z == -1) {
+        	bail("read(2)");
+    	}
     
-    /*  Read the date/time info:    */
-    z = read(s,&dtbuf,sizeof(dtbuf)-1);
-    if (z == -1) {
-        bail("read(2)");
+    	/*  Report the date and time    */
+    	dtbuf[z] = 0;   //null terminate string
+    
+   	printf("Date & Time is: %s\n",dtbuf);
+    	sleep(1);
     }
-    
-    /*  Report the date and time    */
-    dtbuf[z] = 0;   //null terminate string
-    
-    printf("Date & Time is: %s\n",dtbuf);
-    
     /*  Close the socket and exit   */
     close(s);
     putchar('\n');
