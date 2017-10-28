@@ -26,6 +26,7 @@ static void bail (const char *on_what) {
 }
 
 int main(int argc, char **argv) {
+	printf("in main\n");
 	int z;
 	int x;
 	struct sockaddr_in adr;
@@ -47,31 +48,31 @@ int main(int argc, char **argv) {
 	len_inet = sizeof(adr);
 		
 	z = mkaddr(&adr,&len_inet,bc_addr,"udp");
-
+	printf("mkaddr\n");
 	if (z==-1)
 		bail("bad broadcast address");
 
 	//allow multiple users on the broadcast address
 	z = setsockopt(s,SOL_SOCKET,SO_REUSEADDR,&so_reuseaddr,sizeof(so_reuseaddr));
-		
+	printf("set options\n");
 	if (z == -1)
 		bail("setsockopt(SO_REUSEADDR)");
 
 	z = bind(s,(struct sockaddr *)&adr, len_inet);
-
+	printf("bounded\n");
 	if (z==-1)
 		bail("bind(2)");
 
 	for (;;){
 		//wait for broadcast message:
-
+		printf("waiting for message\n");
 		z = recvfrom(s,	//socket
 			dgram,	//receiving buffer
 			sizeof(dgram), //max receiving buffer size
 			0,	//flags: no options
 			(struct sockaddr *)&adr,  //addr
 			&x);	//addr len, in & out
-
+		printf("received\n");
 		if (x<0)
 			bail("recfrom(2)");
 
