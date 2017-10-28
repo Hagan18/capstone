@@ -17,6 +17,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <pthread.h>
 
 /*	reports error and exits back to shell 	*/
 static void bail(const char* on_what) {
@@ -30,6 +31,7 @@ static void bail(const char* on_what) {
 }
 
 int main(int argc,char **argv) {
+	fflush(stdout);
 	int z;
 	char* srvr_addr = NULL;
 	char* srvr_port = "9099";
@@ -41,6 +43,8 @@ int main(int argc,char **argv) {
 	int n;							//bytes
 	time_t td;						//current date&time
 	char dtbuf[128];				//date/time info
+	int pid;
+	int connects=0;
 
 	/*
 	 * Use a server address from the command line, if one was provided.
@@ -100,23 +104,48 @@ int main(int argc,char **argv) {
 	/*	Start the server loop:	*/
 	while(1){
 		/* wait for a connection	*/
+		
+		char line[256];
+		int i,slaves=0;
+		printf("enter a message: ");
 		len_inet = sizeof(adr_clnt);
+		if (fgets(line, sizeof(line), stdin)){
+			if (sscanf(line, "%d", &i)){}
+		}
+		
 		c = accept(s,(struct sockaddr *) &adr_clnt,(socklen_t *) &len_inet);
 		if (c == -1) {
 			bail("accept(2)");
 		}
+		connects+=1;
+		printf("connection #%d, Socket: %d\n",connects,c);
 
+		pid = fork();
+		if (pid < 0){
+			bail("pid");
+		}
+		if (pid == 0) {
+			slaves++;
+			while (slaves != 2) {
+				//wait until slaves == 2
+			}
+
+			z = write(c,line,sizeof(line));
+			if (z == -1){
+				bail("write(2)");
+			}
+		}
+		
 		/*	generate a time stamp:	*/
-		time(&td);
+		//time(&td);
 		//n = (int) strftime(dtbuf, sizeof(dtbuf),"%A %b %d %H:%M:%S %Y\n",localtime(&td));
-		n = (int) strftime(dtbuf, sizeof(dtbuf),"%A %b %d\n",localtime(&td));
+		//n = (int) strftime(dtbuf, sizeof(dtbuf),"%A %b %d\n",localtime(&td));
 		/*	write back to client: 	*/
 		//z = write(c,dtbuf,n);
-		z = write(c,"Kyle",6);
-		if (z == -1){
-			bail("write(2)");
-		}
 
+		//z = write(c,line,sizeof(line));
+		//free(data);
+		
 		close(c);
 	}
 	/*	This portion is never reached because of the infinite loop	*/
