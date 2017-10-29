@@ -17,6 +17,12 @@
 
 extern int mkaddr(void *addr, int *addrlen, char *str_addr, char *protocol);
 
+typedef struct{
+	char dgram[512];
+	sockaddr_in adr;
+	int x;
+}Data;
+
 static void bail (const char *on_what) {
 	fputs(strerror(errno),stderr);
 	fputs("L ",stderr);
@@ -25,8 +31,13 @@ static void bail (const char *on_what) {
 	exit(1);
 }
 
+void getMessage(Data data){
+
+}
+
 int main(int argc, char **argv) {
 	printf("in main\n");
+	Data data;
 	int z;
 	int x;
 	struct sockaddr_in adr;
@@ -35,6 +46,7 @@ int main(int argc, char **argv) {
 	char dgram[512];
 	static int so_reuseaddr = TRUE;
 	static char *bc_addr = "127.255.255.255:9097";
+	pthread_t t1,t2;
 
 	if (argc > 1){
 		//broadcast address
@@ -64,6 +76,10 @@ int main(int argc, char **argv) {
 		bail("bind(2)");
 
 	for (;;){
+		data.dgram = strcpy(dgram);
+		data.x = x;
+		data.adr = adr;
+		pthread_create(&t1,NULL,(void*)getMessage,(void*)data);
 		//wait for broadcast message:
 		printf("waiting for message\n");
 		z = recvfrom(s,	//socket
@@ -83,7 +99,6 @@ int main(int argc, char **argv) {
 		if (strncmp(input,"kyle",1) == 0) {
 			int status = system("omxplayer blink.mp3");
 		}
-
 		putchar('\n');
 
 		fflush(stdout);
