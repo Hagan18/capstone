@@ -36,8 +36,6 @@ typedef struct{
 	int s;
 }Data;
 
-
-
 static void bail(const char *on_what);
 void interperateMessage();
 void getMessage();
@@ -70,12 +68,19 @@ void getMessage(void){
 
 void interperateMessage(){
 	if (z >= 0){
-		char *input = malloc(sizeof(char*)*2);
+		char *command = malloc(sizeof(char*)*50);
+		strcpy(command,"omxplayer -o local ");
+		char *input = malloc(sizeof(char*)*5);
 		strcpy(input,dgram);
 		//printf(input);
 		fwrite(dgram,y,1,stdout);
+		char *song = malloc(sizeof(char*)*5);
+
+		strcpy(song,"blink.mp3");
+		strcat(command,song);
+		printf("%s\n",command);
 		if (strncmp(input,"kyle",1) == 0) {
-			int status = system("omxplayer blink.mp3");
+			int status = system(command);
 		}
 		else if(strncmp(input,"pause",1) == 0){
 			printf("pause statement\n");
