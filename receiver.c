@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 
 #ifndef TRUE
 #define TRUE 1
@@ -16,12 +17,18 @@
 #endif
 
 extern int mkaddr(void *addr, int *addrlen, char *str_addr, char *protocol);
+int y;
 
 typedef struct{
 	char dgram[512];
-	sockaddr_in adr;
+	struct sockaddr_in adr;
 	int x;
+	int s;
 }Data;
+
+static void bail(const char *on_what);
+void interperateMessage(Data data);
+void getMessage(Data data);
 
 static void bail (const char *on_what) {
 	fputs(strerror(errno),stderr);
@@ -32,11 +39,31 @@ static void bail (const char *on_what) {
 }
 
 void getMessage(Data data){
+	while (1){
+		printf("waiting for connection:\n");
+		y = recvfrom(data.s, 
+					data.dgram, 
+					sizeof(data.dgram), 
+					0, 
+					(struct sockaddr *) &(data.adr), 
+					&(data.x));
+		if (data.x < 0){
+			bail("recvfrom()");
+		}
+		if (y != 0){
+			//message received
+			sleep(1);	//sleep for one sec so that the other threads can notice the flag change
+			y=0;
+		}
+		y=0;
+	}
+}
 
+void interperateMessage(Data data){
+	
 }
 
 int main(int argc, char **argv) {
-	printf("in main\n");
 	Data data;
 	int z;
 	int x;
@@ -53,20 +80,22 @@ int main(int argc, char **argv) {
 		bc_addr = argv[1];
 	}
 	s = socket(AF_INET,SOCK_DGRAM,0);
+	data.s = s;
+
 	if (s == -1)
 		bail("socket()");
 
 	//form broadcast address
 	len_inet = sizeof(adr);
-		
+	
 	z = mkaddr(&adr,&len_inet,bc_addr,"udp");
-	printf("mkaddr\n");
+
 	if (z==-1)
 		bail("bad broadcast address");
 
 	//allow multiple users on the broadcast address
 	z = setsockopt(s,SOL_SOCKET,SO_REUSEADDR,&so_reuseaddr,sizeof(so_reuseaddr));
-	printf("set options\n");
+
 	if (z == -1)
 		bail("setsockopt(SO_REUSEADDR)");
 
@@ -75,27 +104,26 @@ int main(int argc, char **argv) {
 	if (z==-1)
 		bail("bind(2)");
 
-	for (;;){
-		data.dgram = strcpy(dgram);
+	for (;;){ 
+		strcpy(data.dgram,dgram);
+
 		data.x = x;
 		data.adr = adr;
-		pthread_create(&t1,NULL,(void*)getMessage,(void*)data);
+		pthread_create(&t1,NULL,(void*)getMessage,&data);
 		//wait for broadcast message:
-		printf("waiting for message\n");
-		z = recvfrom(s,	//socket
-			dgram,	//receiving buffer
-			sizeof(dgram), //max receiving buffer size
-			0,	//flags: no options
-			(struct sockaddr *)&adr,  //addr
-			&x);	//addr len, in & out
-		if (x<0)
-			bail("recfrom(2)");
+		// y = recvfrom(s,	//socket
+		// 	dgram,	//receiving buffer
+		// 	sizeof(dgram), //max receiving buffer size
+		// 	0,	//flags: no options
+		// 	(struct sockaddr *)&adr,  //addr
+		// 	&x);	//addr len, in & out
+		// if (x<0)
+		// 	bail("recfrom(2)");
 
-		fwrite(dgram,z,1,stdout);
+		fwrite(data.dgram,y,1,stdout);
 		char *input = malloc(sizeof(char*)*2);
 		//input = strdup(dgram);
-		strcpy(input,dgram);
-		printf("%d",sizeof(input));
+		strcpy(input,data.dgram);
 		if (strncmp(input,"kyle",1) == 0) {
 			int status = system("omxplayer blink.mp3");
 		}
