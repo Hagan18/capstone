@@ -28,6 +28,7 @@ char dgram[512];
 struct sockaddr_in adr;
 Display *display;
 unsigned int keycode;
+int playing=0; //flag used to determine if playing
 
 typedef struct{
 	char dgram[512];
@@ -79,12 +80,19 @@ void interperateMessage(){
 		strcpy(song,"blink.mp3");
 		strcat(command,song);
 		printf("%s\n",command);
-		if (strncmp(input,"kyle",1) == 0) {
+		if (strncmp(input,"kyle",1) == 0 && !playing) {
 			int status = system(command);
+			playing = 1;
 		}
 		else if(strncmp(input,"pause",1) == 0){
 			printf("pause statement\n");
 			int status = system("xdotool key p");
+		}
+		else if(strncmp(input,"+",1) == 0){
+			int status = system("xdotool key plus");
+		}
+		else if(strncmp(input,"-",1) == 0){
+			int status = system("xdotool key minus");
 		}
 		putchar('\n');
 		fflush(stdout);
