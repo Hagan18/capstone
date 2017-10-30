@@ -60,7 +60,18 @@ void getMessage(Data data){
 }
 
 void interperateMessage(Data data){
-	
+	if (y != 0){
+		if (strncmp(data.dgram, 'k', 1) == 0){
+			fwrite(data.dgram,y,1,stdout);
+			char *input = malloc(sizeof(char*)*2);
+			strcpy(input,data.dgram);
+			if (strncmp(input,"kyle",1) == 0) {
+				int status = system("omxplayer blink.mp3");
+			}
+			putchar('\n');
+			fflush(stdout);
+		}
+	}
 }
 
 int main(int argc, char **argv) {
@@ -120,16 +131,16 @@ int main(int argc, char **argv) {
 		// if (x<0)
 		// 	bail("recfrom(2)");
 
-		fwrite(data.dgram,y,1,stdout);
-		char *input = malloc(sizeof(char*)*2);
-		//input = strdup(dgram);
-		strcpy(input,data.dgram);
-		if (strncmp(input,"kyle",1) == 0) {
-			int status = system("omxplayer blink.mp3");
-		}
-		putchar('\n');
+		// fwrite(data.dgram,y,1,stdout);
+		// char *input = malloc(sizeof(char*)*2);
+		// //input = strdup(dgram);
+		// strcpy(input,data.dgram);
+		// if (strncmp(input,"kyle",1) == 0) {
+		// 	int status = system("omxplayer blink.mp3");
+		// }
+		// putchar('\n');
 
-		fflush(stdout);
+		// fflush(stdout);
 	}
 
 	return 0;
