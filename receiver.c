@@ -39,8 +39,8 @@ static void bail (const char *on_what) {
 }
 
 void getMessage(Data data){
+	y=0;
 	while (1){
-		printf("waiting for connection:\n");
 		y = recvfrom(data.s, 
 					data.dgram, 
 					sizeof(data.dgram), 
@@ -50,7 +50,8 @@ void getMessage(Data data){
 		if (data.x < 0){
 			bail("recvfrom()");
 		}
-		if (y != 0){
+		if (y >= 0){
+			printf("connection made: y=%d\n",y);
 			//message received
 			sleep(1);	//sleep for one sec so that the other threads can notice the flag change
 			y=0;
