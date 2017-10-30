@@ -10,6 +10,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
+#include <X11/extensions/XTest.h>
 
 #ifndef TRUE
 #define TRUE 1
@@ -18,6 +21,13 @@
 
 extern int mkaddr(void *addr, int *addrlen, char *str_addr, char *protocol);
 int y;
+int x;
+int s;
+int z;
+char dgram[512];
+struct sockaddr_in adr;
+Display *display;
+unsigned int keycode;
 
 typedef struct{
 	char dgram[512];
@@ -26,9 +36,11 @@ typedef struct{
 	int s;
 }Data;
 
+
+
 static void bail(const char *on_what);
-void interperateMessage(Data data);
-void getMessage(Data data);
+void interperateMessage();
+void getMessage();
 
 static void bail (const char *on_what) {
 	fputs(strerror(errno),stderr);
@@ -38,61 +50,54 @@ static void bail (const char *on_what) {
 	exit(1);
 }
 
-void getMessage(Data data){
-	y=0;
+void getMessage(void){
+	pthread_t t2;
 	while (1){
-		y = recvfrom(data.s, 
-					data.dgram, 
-					sizeof(data.dgram), 
-					0, 
-					(struct sockaddr *) &(data.adr), 
-					&(data.x));
-		if (data.x < 0){
+		z = recvfrom(s,	dgram,sizeof(dgram),0,(struct sockaddr *) &adr, &x);
+		printf("%d\n",y);
+		if (x < 0){
 			bail("recvfrom()");
 		}
-		if (y >= 0){
-			printf("connection made: y=%d\n",y);
+		if (z >= 0){
+			printf("connection made: y=%d\n",z);
+
 			//message received
-			sleep(1);	//sleep for one sec so that the other threads can notice the flag change
-			y=0;
+			pthread_create(&t2,NULL,(void*)interperateMessage,NULL);
 		}
-		y=0;
+
 	}
 }
 
-void interperateMessage(Data data){
-	if (y != 0){
-		if (strncmp(data.dgram, 'k', 1) == 0){
-			fwrite(data.dgram,y,1,stdout);
-			char *input = malloc(sizeof(char*)*2);
-			strcpy(input,data.dgram);
-			if (strncmp(input,"kyle",1) == 0) {
-				int status = system("omxplayer blink.mp3");
-			}
-			putchar('\n');
-			fflush(stdout);
+void interperateMessage(){
+	if (z >= 0){
+		char *input = malloc(sizeof(char*)*2);
+		strcpy(input,dgram);
+		//printf(input);
+		fwrite(dgram,y,1,stdout);
+		if (strncmp(input,"kyle",1) == 0) {
+			int status = system("omxplayer blink.mp3");
 		}
+		else if(strncmp(input,"pause",1) == 0){
+			printf("pause statement\n");
+			int status = system("xdotool key p");
+		}
+		putchar('\n');
+		fflush(stdout);
 	}
 }
 
 int main(int argc, char **argv) {
-	Data data;
-	int z;
-	int x;
-	struct sockaddr_in adr;
 	int len_inet;
-	int s;
-	char dgram[512];
 	static int so_reuseaddr = TRUE;
 	static char *bc_addr = "127.255.255.255:9097";
-	pthread_t t1,t2;
+	pthread_t t1;
 
 	if (argc > 1){
 		//broadcast address
 		bc_addr = argv[1];
 	}
 	s = socket(AF_INET,SOCK_DGRAM,0);
-	data.s = s;
+	printf("address: %s\n",bc_addr);
 
 	if (s == -1)
 		bail("socket()");
@@ -116,32 +121,11 @@ int main(int argc, char **argv) {
 	if (z==-1)
 		bail("bind(2)");
 
-	for (;;){ 
-		strcpy(data.dgram,dgram);
+	//start thread to receive data
+	pthread_create(&t1,NULL,(void*)getMessage,NULL);
 
-		data.x = x;
-		data.adr = adr;
-		pthread_create(&t1,NULL,(void*)getMessage,&data);
-		//wait for broadcast message:
-		// y = recvfrom(s,	//socket
-		// 	dgram,	//receiving buffer
-		// 	sizeof(dgram), //max receiving buffer size
-		// 	0,	//flags: no options
-		// 	(struct sockaddr *)&adr,  //addr
-		// 	&x);	//addr len, in & out
-		// if (x<0)
-		// 	bail("recfrom(2)");
-
-		// fwrite(data.dgram,y,1,stdout);
-		// char *input = malloc(sizeof(char*)*2);
-		// //input = strdup(dgram);
-		// strcpy(input,data.dgram);
-		// if (strncmp(input,"kyle",1) == 0) {
-		// 	int status = system("omxplayer blink.mp3");
-		// }
-		// putchar('\n');
-
-		// fflush(stdout);
+	while (1){
+		sleep(1000);
 	}
 
 	return 0;
