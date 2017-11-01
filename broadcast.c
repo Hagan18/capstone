@@ -134,7 +134,6 @@ int main(int argc, char**argv){
 
 	for (;;) {
 		gen_quote();
-		printf("in for\n");
 		bp = bcbuf;
 		for (x=0; x<MAXQ; ++x){
 			IO = quotes[x].start / 100.0;
