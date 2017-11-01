@@ -22,37 +22,19 @@ int main(){
 	
 	// Method 1
 	//Open communication with arduino	
-	int portName = open("/dev/cu.usbmodem14611", O_RDWR | O_NOCTTY | O_NDELAY);
+	int portName = open("/dev/ttyACM0", O_RDWR | O_NOCTTY | O_NDELAY);
 	
-/*	struct termios options;
-	tcgetattr(portName, &options);
-	cfsetispeed(&options, B9600);
-	cfsetospeed(&options, B9600);
-	options.c_cflag |= (CLOCAL | CREAD);
-	tcsetattr(portName, TCSANOW, &options);
-	//8 bit characters	
-*///	options.c_cflag &= ~CSIZE; /* Mask the character size bits */
-//	options.c_cflag |= CS8;    /* Select 8 data bits */
-	//No parity
-//	options.c_cflag &= ~PARENB;
-//	options.c_cflag &= ~CSTOPB;
-	
-	//Send Take Sample command to arduino
-	//char num[] = "3";
-		
-	//write(portName, num, 1);
-	//printf("%s\n",num);
-	
-	//Read Hb answer
-	unsigned char *data = malloc(sizeof(char*)*50);
-	int pos = 0;
 	while(1) {
-		char *data = malloc(sizeof(char*)*50);
+		char *data = malloc(sizeof(char*));
+		strcpy(data,"");
 		if(read(portName, data, sizeof(data)) == 0){
 			continue;
 		}
-		sleep(1);
+		usleep(10000);	//keep 10000 as any faster, and the program reads in each character written to the serial connection
 		printf("%s\n",data);
+		//if (strncmp(data,"12",2) == 0){
+		//	break;
+		//}
 		free(data);
 	}
 	

@@ -12,7 +12,7 @@ int right;
 int totalEntered = 0;
 int totalExited = 0;
 unsigned int population=0;
-  
+
 void setup() {
   // put your setup code here, to run once:
   pinMode(7,INPUT);
@@ -21,12 +21,14 @@ void setup() {
 }
 
 void loop() {
-  if(population<0){population=0;} //error in sensor reading
+  if(population<0){
+    population=0;
+  } //error in sensor reading
   // put your main code here, to run repeatedly:
   left = digitalRead(7);
   right = digitalRead(4);
   //Serial.println(right);
-  
+
   if (((left == 0) && (right == 1)) && completeFlag == 0){
     leftMillis = millis();
     if (rightFlag == 1){
@@ -39,7 +41,7 @@ void loop() {
       leftFlag = 1;
     }
   }
-  
+
   if (((right == 0) && (left ==1)) && completeFlag == 0){
     rightMillis = millis();
     if (leftFlag == 1){
@@ -79,8 +81,9 @@ void loop() {
     delay(1000);
   }
 
-  
+
   Serial.flush();
   //Serial.println(left);
 }
+
 

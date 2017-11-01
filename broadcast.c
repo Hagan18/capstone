@@ -16,11 +16,24 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <pthread.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <stdint.h>
 
 #ifndef TRUE
 #define TRUE 1
 #define FALSE 0
 #endif
+
+long population = 0;
+short x;
+double IO;
+double I;
+int z;
+int s;
+struct sockaddr_in adr_bc;
+int len_bc;
 
 extern int mkaddr(void *addr,
 		  int *addrlen,
@@ -35,19 +48,56 @@ static void bail (const char *on_what){
 	exit(1);
 }
 
+void monitorPopulation(void){
+	
+	int portName = open("/dev/ttyACM0", O_RDWR | O_NOCTTY | O_NDELAY);
+
+	while(1){
+		char *data = malloc(sizeof(char*));
+		strcpy(data,"");	//make sure it's empty
+		if (read(portName, data, sizeof(data)) == 0){
+			continue;
+		}
+		usleep(10000); //don't decrease as it will start reading in 1 char at a time
+		long tempPopulation = strtol(data,NULL,10);
+		
+		//printf("population data: %ld\n",population);
+
+		if (population < 20 && tempPopulation >= 20){
+			z = sendto(s, "+", 1, 0, (struct sockaddr *)&adr_bc, len_bc);
+			if (z == -1){
+				bail("sendto()");
+			}
+			printf("increasing volume\n");
+		}
+		else if (population >= 20 && tempPopulation <= 19){
+			z = sendto(s, "-",1,0,(struct sockaddr *)&adr_bc,len_bc);
+			if (z == -1){
+				bail("sendto()");
+			}
+			printf("decreasing volume\n");
+		}
+		population = tempPopulation;
+		
+		free(data);
+	}
+	close(portName); //never actually reaches here
+}
+
 int main(int argc, char**argv){
-	short x;
-	double IO;
-	double I;
+	//short x;
+	//double IO;
+	//double I;
 	char bcbuf[512], *bp;
-	int z;
-	int s;
+	//int z;
+	//int s;
 	struct sockaddr_in adr_srvr;
 	int len_srvr;
-	struct sockaddr_in adr_bc;
-	int len_bc;
+	//struct sockaddr_in adr_bc;
+	//int len_bc;
 	static int so_broadcast = TRUE;
 	static char *sv_addr, *bc_addr; //= "127.0.0.1:*", *bc_addr = "127.255.255.255:9097";
+	pthread_t t1;
 
 	if (argc > 2){
 		sv_addr = argv[2];
@@ -87,6 +137,8 @@ int main(int argc, char**argv){
 
 	if (z==-1)
 		bail("bind()");
+
+	pthread_create(&t1,NULL,(void*)monitorPopulation,NULL);
 
 	while(1) {
 		bp = bcbuf;
