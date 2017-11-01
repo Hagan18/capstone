@@ -67,14 +67,11 @@ void checkPlay(void){
 void getMessage(void){
 	pthread_t t2;
 	while (1){
-		printf("waiting from port: %d\n",adr.sin_port);
 		z = recvfrom(s,	dgram,sizeof(dgram),0,(struct sockaddr *) &adr, &x);
-		printf("%d\n",y);
 		if (x < 0){
 			bail("recvfrom()");
 		}
 		if (z >= 0){
-			printf("connection made: y=%d\n",z);
 			//message received
 			pthread_create(&t2,NULL,(void*)interperateMessage,NULL);
 		}
@@ -93,12 +90,12 @@ void interperateMessage(){
 		char *input = malloc(sizeof(char*)*5);
 		strcpy(input,dgram);
 		//printf(input);
-		fwrite(dgram,y,1,stdout);
+		//fwrite(dgram,y,1,stdout);
 		char *song = malloc(sizeof(char*)*5);
 
 		strcpy(song,"blink.mp3");
 		strcat(command,song);
-		printf("%s\n",command);
+		//printf("%s\n",command);
 		if (strncmp(input,"kyle",1) == 0 && !start) {
 			pthread_create(&t3,NULL,(void*)checkPlay,NULL);
 			start = 1;
@@ -118,7 +115,7 @@ void interperateMessage(){
 		}
 		else if(strncmp(input,"quit",1) == 0){
 			int status = system("xdotool key q");
-			printf("exiting omxplayer\n");
+			//printf("exiting omxplayer\n");
 		}
 		putchar('\n');
 		fflush(stdout);
@@ -128,7 +125,7 @@ void interperateMessage(){
 int main(int argc, char **argv) {
 	int len_inet;
 	static int so_reuseaddr = TRUE;
-	static char *bc_addr = "127.255.255.255:9097";
+	static char *bc_addr; //"127.255.255.255:9097";
 	pthread_t t1,t3;
 
 	if (argc > 1){
