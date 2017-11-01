@@ -89,7 +89,7 @@ void interperateMessage(){
 	pthread_t t3;
 	if (z >= 0){
 		char *command = malloc(sizeof(char*)*50);
-		strcpy(command,"omxplayer -o local ");
+		strcpy(command,"omxplayer -s -o local ");
 		char *input = malloc(sizeof(char*)*5);
 		strcpy(input,dgram);
 		//printf(input);
