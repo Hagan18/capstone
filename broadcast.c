@@ -26,48 +26,6 @@ extern int mkaddr(void *addr,
 		  int *addrlen,
 		  char *str_addr,
 		  char *protocol);
-#define MAXQ 4
-
-static struct {
-	char *index;
-	int start;
-	int volit;
-	int current;
-} quotes[] = {
-	{ "DJIA", 1030330,  357 },
-	{ "NASDAQ", 276175, 125 },
-	{ "S&P 500", 128331, 50 }, 
-	{ "TSE 300", 689572, 75 }, 
-};
-
-static void initialize (void) {
-	short x;
-	time_t td;
-
-	time(&td);
-	srand((int)td);
-
-	for(x=0; x< MAXQ; ++x){
-		quotes[x].current = quotes[x].start;
-	}
-}
-
-static void gen_quote(void) {
-	short x;
-	short v;
-	short h;
-	short r;
-
-	x = rand() % MAXQ;
-	v = quotes[x].volit;
-	h = (v/2) - 2;
-	r = rand() % v;
-
-	if (r<h)
-		r = -r;
-	
-	quotes[x].current += r;
-}
 
 static void bail (const char *on_what){
 	fputs(strerror(errno),stderr);
@@ -89,7 +47,7 @@ int main(int argc, char**argv){
 	struct sockaddr_in adr_bc;
 	int len_bc;
 	static int so_broadcast = TRUE;
-	static char *sv_addr = "127.0.0.1:*", *bc_addr = "127.255.255.255:9097";
+	static char *sv_addr, *bc_addr; //= "127.0.0.1:*", *bc_addr = "127.255.255.255:9097";
 
 	if (argc > 2){
 		sv_addr = argv[2];
@@ -99,7 +57,7 @@ int main(int argc, char**argv){
 	}
 
 	len_srvr = sizeof(adr_srvr);
-
+	
 	z = mkaddr(&adr_srvr, &len_srvr, sv_addr,"udp");
 
 	if (z==-1){
@@ -130,18 +88,8 @@ int main(int argc, char**argv){
 	if (z==-1)
 		bail("bind()");
 
-	initialize();
-
-	for (;;) {
-		gen_quote();
+	while(1) {
 		bp = bcbuf;
-		for (x=0; x<MAXQ; ++x){
-			IO = quotes[x].start / 100.0;
-			I = quotes[x].current / 100.0;
-			sprintf(bp,"%-7.7s %8.2f %+.2f\n", quotes[x].index, I, I-IO);
-
-			bp += strlen(bp);
-		}
 		char input[256];
 		int i;
 		printf("enter some shit: ");
@@ -149,11 +97,8 @@ int main(int argc, char**argv){
 			if(sscanf(input,"%d", &i)){}
 		}
 		z = sendto(s, input, strlen(input), 0, (struct sockaddr *)&adr_bc, len_bc);
-		printf("sent\n");
 		if(z==-1)
 			bail("sendto()");
-
-		//sleep(4);
 	}
 	return 0;
 }
