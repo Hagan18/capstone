@@ -85,18 +85,11 @@ void monitorPopulation(void){
 }
 
 int main(int argc, char**argv){
-	//short x;
-	//double IO;
-	//double I;
 	char bcbuf[512], *bp;
-	//int z;
-	//int s;
 	struct sockaddr_in adr_srvr;
 	int len_srvr;
-	//struct sockaddr_in adr_bc;
-	//int len_bc;
 	static int so_broadcast = TRUE;
-	static char *sv_addr, *bc_addr; //= "127.0.0.1:*", *bc_addr = "127.255.255.255:9097";
+	static char *sv_addr, *bc_addr; 
 	pthread_t t1;
 
 	if (argc > 2){
@@ -139,12 +132,20 @@ int main(int argc, char**argv){
 		bail("bind()");
 
 	pthread_create(&t1,NULL,(void*)monitorPopulation,NULL);
+	
+	printf("Please choose a command from the following list:\n");
+	printf("----------------------------------\n"
+		"play: play the playlist.\n"
+		"+   : manually increase volume\n"
+		"-   : manually decrease volume\n"
+		"q   : skip the current the audio playback\n"
+		"----------------------------------\n");
 
 	while(1) {
 		bp = bcbuf;
 		char input[256];
 		int i;
-		printf("enter some shit: ");
+		printf("Enter a command: ");
 		if (fgets(input, sizeof(input),stdin)){
 			if(sscanf(input,"%d", &i)){}
 		}
